@@ -1,0 +1,18 @@
+---
+# tasks file for winlogbeat
+
+- name: Install Winlogbeat
+  include: install.yml
+  tags:
+    - never
+    - winlogbeat_install
+
+- name: Configure Winlogbeat
+  include: configure.yml
+  tags:
+    - winlogbeat_configure
+
+- name: Start Winlogbeat
+  win_service:
+    name: winlogbeat
+    state: started

@@ -1,0 +1,33 @@
+---
+
+# Events
+winlogbeat.event_logs:
+  {{ winlogbeat_event_logs | to_nice_yaml | indent(2) }}
+
+# Fields and tags
+
+{% if winlogbeat_tags  %}
+tags: {{ winlogbeat_tags | to_json }}
+{% endif %}
+
+{% if winlogbeat_fields  %}
+fields: {{ winlogbeat_fields | to_json }}
+{% endif %}
+
+{% if winlogbeat_fields_under_root  %}
+fields_under_root: {{ winlogbeat_fields_under_root }}
+{% endif %}
+
+
+#Output
+{{ winlogbeat_output | to_nice_yaml }}
+
+{% if winlogbeat_output_elasticsearch_hosts  %}
+output.elasticsearch.hosts: {{ winlogbeat_output_elasticsearch_hosts | to_json }}
+{% endif %}
+
+{% if winlogbeat_output_logstash_hosts %}
+output.logstash.hosts: {{ winlogbeat_output_logstash_hosts | to_json }}
+{% endif %}
+
+{{ winlogbeat_conf_overrides | to_nice_yaml }}

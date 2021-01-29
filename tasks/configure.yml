@@ -1,0 +1,13 @@
+
+- name: Copy WinLogBeat configuration.
+  win_template:
+    src: winlogbeat.yml.j2
+    dest: "{{ winlogbeat_install_location }}/winlogbeat.yml"
+  notify: restart winlogbeat
+
+- name: Copy certificates
+  win_copy:
+    src: "{{ winlogbeat_ssl_src }}"
+    dest: "{{ winlogbeat_install_location }}"
+  when: winlogbeat_ssl_enabled is true
+  notify: restart winlogbeat

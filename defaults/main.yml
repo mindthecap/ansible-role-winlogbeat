@@ -1,0 +1,75 @@
+---
+# defaults file for winlogbeat
+
+winlogbeat_download_url_base: 'https://artifacts.elastic.co/downloads/beats/winlogbeat'
+file_ext: '.zip'
+winlogbeat_version: '7.9.3'
+winlogbeat_download_file: 'winlogbeat-{{ winlogbeat_version }}-windows-x86_64'
+winlogbeat_extract_location: "C:/Program Files/Winlogbeat"
+winlogbeat_install_location: "C:/Program Files/Winlogbeat/{{ winlogbeat_download_file }}"
+
+winlogbeat_install_offline: false
+winlogbeat_offline_location: "/etc/ansible/repo/winlogbeat"
+winlogbeat_offline_file: "{{ winlogbeat_offline_location }}/{{ winlogbeat_download_file }}"
+
+winlogbeat_event_logs:
+  - name: ForwardedEvents
+    batch_read_size: 8192
+    api: wineventlog-experimental
+    forwarded: true
+    ignore_older: 72h
+    processors:
+      - script:
+          when.equals.winlog.channel: Security
+          lang: "javascript"
+          id: "sysmon"
+          file: "{{ winlogbeat_install_location }}/module/security/config/winlogbeat-security.js"
+      - script:
+          when.equals.winlog.channel: Microsoft-Windows-Sysmon/Operational
+          lang: "javascript"
+          id: "sysmon"
+          file: "{{ winlogbeat_install_location }}/module/sysmon/config/winlogbeat-sysmon.js"
+
+
+winlogbeat_tags:
+winlogbeat_fields:
+winlogbeat_fields_under_root:
+
+winlogbeat_output_elasticsearch_hosts:
+#  - "localhost:9200"
+
+winlogbeat_output:
+  output.logstash:
+    loadbalance: true
+    ssl.certificate_authorities: "{{ winlogbeat_install_location }}/{{ inventory_hostname }}/ca.crt"
+    ssl.certificate: "{{ winlogbeat_install_location }}/{{ inventory_hostname }}/{{ inventory_hostname }}.cer"
+    ssl.key: "{{ winlogbeat_install_location }}/{{ inventory_hostname }}/{{ inventory_hostname }}.key"
+
+winlogbeat_output_logstash_hosts:
+  - "localhost:5044"
+  
+winlogbeat_enable_logging: false
+winlogbeat_log_level: warning
+winlogbeat_log_dir: "{{ winlogbeat_install_location }}/{{ winlogbeat_download_file }}/logs"
+winlogbeat_log_filename: mybeat.log
+
+winlogbeat_ssl_certificate_authorities:
+  - '{{ winlogbeat_install_location }}\\ca.crt'
+#  - "C:\trust_store\ca.pem"
+winlogbeat_ssl_verification_mode: # none, full
+winlogbeat_ssl_renegotiation: #never, once, freely
+winlogbeat_ssl_supported_protocols: #Collection: [SSLv3, TLSv1, TLSv1.0, TLSv1.1, TLSv1.2]
+winlogbeat_ssl_cipher_suites: #Collection - See docs for available types
+winlogbeat_ssl_curve_types: #Collection - [P-256, P-384, P521]
+
+# Certificates
+winlogbeat_ssl_enabled: true
+winlogbeat_ssl_src: "certs/{{ inventory_hostname }}"
+
+winlogbeat_conf_overrides:
+  xpack.monitoring.enabled: false
+  http.enabled: true
+  http.port: 5066
+  queue.mem:
+    events: 81920
+    flush.timeout: "1s"
