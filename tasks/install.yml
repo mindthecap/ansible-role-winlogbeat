@@ -39,3 +39,8 @@
   args:
     chdir: "{{ winlogbeat_install_location }}"
 
+- name: Add WECSVC as dependency
+  win_service:
+    name: winlogbeat
+    dependencies:
+      - wecsvc
